@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Özür Bahçesi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #000;
+        }
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .scene.active {
+            display: flex;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .text {
+            z-index: 3;
+            font-size: 3em;
+            color: #fff;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            opacity: 0;
+        }
+        .continue-btn, .music-btn, .affirm-btn {
+            z-index: 3;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            opacity: 0;
+            transition: background 0.3s;
+        }
+        .continue-btn {
+            background: #ff4081;
+        }
+        .continue-btn:hover {
+            background: #c51162;
+        }
+        .music-btn {
+            background: #2196f3;
+        }
+        .music-btn:hover {
+            background: #1976d2;
+        }
+        .affirm-btn {
+            background: #4caf50;
+        }
+        .affirm-btn:hover {
+            background: #388e3c;
+        }
+        .celestial {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+        .sun {
+            background: radial-gradient(circle, #ffeb3b, #ff9800);
+        }
+        .moon {
+            background: radial-gradient(circle, #e0e0e0, #b0b0b0);
+        }
+        .cloud {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+        .cloud.dark {
+            background: #444;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+        .cloud::before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 20px;
+        }
+        .cloud::after {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            left: 40px;
+        }
+        .chicken {
+            position: absolute;
+            bottom: 20%;
+            left: 30%;
+            width: 80px;
+            height: 100px;
+            z-index: 3;
+        }
+        .chicken-body {
+            width: 60px;
+            height: 70px;
+            background: #fff;
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            left: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .chicken-head {
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: -10px;
+            left: 25px;
+        }
+        .chicken-eye {
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .chicken-eye.sad::before {
+            content: '';
+            width: 8px;
+            height: 4px;
+            background: #000;
+            position: absolute;
+            top: -2px;
+            left: -1px;
+            border-radius: 50% 50% 0 0;
+            transform: rotate(-30deg);
+        }
+        .chicken-beak {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #ffa500;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+        }
+        .chicken-wing {
+            width: 20px;
+            height: 30px;
+            background: #f5f5f5;
+            border-radius: 50% 20% 50% 20%;
+            position: absolute;
+            top: 20px;
+            left: -10px;
+            transform: rotate(20deg);
+        }
+        .chicken-wing.right {
+            left: 50px;
+            transform: rotate(-20deg);
+        }
+        .tear {
+            width: 8px;
+            height: 12px;
+            background: #87ceeb;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            left: 8px;
+            opacity: 0;
+        }
+        .heart {
+            width: 20px;
+            height: 20px;
+            background: #ff69b4;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            transform: rotate(-45deg);
+            opacity: 0;
+        }
+        .heart::before, .heart::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: #ff69b4;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .heart::before {
+            top: -10px;
+            left: 0;
+        }
+        .heart::after {
+            left: 10px;
+            top: 0;
+        }
+        .busha-flower {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            width: 60px;
+            height: 150px;
+            z-index: 3;
+        }
+        .flower-stem {
+            width: 6px;
+            height: 100px;
+            background: #2e8b57;
+            position: absolute;
+            bottom: 0;
+            left: 27px;
+        }
+        .flower-petals {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff69b4, #ff1493);
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: scale(1);
+        }
+        .flower-center {
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        .flower-arm {
+            width: 10px;
+            height: 30px;
+            background: #2e8b57;
+            position: absolute;
+            top: 50px; /* Gövdeden çıkacak şekilde */
+            left: 20px;
+            transform: rotate(0deg);
+            opacity: 0;
+        }
+        .flower-arm.right {
+            left: 34px;
+            transform: rotate(0deg);
+        }
+        /* Sahne Özel Stilleri */
+        #scene1 { background: linear-gradient(to bottom, #ff8c00, #87ceeb); }
+        #scene2 { background: linear-gradient(to bottom, #87cefa, #d4a5a5); }
+        #scene3 { background: linear-gradient(to bottom, #87cefa, #d4a5a5); }
+        .word {
+            display: inline-block;
+            margin: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        #scene4 { background: linear-gradient(to bottom, #ff4500, #808080); }
+        #scene4 .flower-petals { background: radial-gradient(circle, #a52a2a, #8b0000); transform: scale(0.5); }
+        #scene5 { background: linear-gradient(to bottom, #2f4f4f, #000); }
+        #scene5 .flower-petals { transform: scale(0.2); }
+        #scene6 { background: #fff; }
+        #scene6 .flower-stem { background: #b0c4de; }
+        #scene6 .flower-petals { transform: scale(0); }
+        #scene7 { background: linear-gradient(to bottom, #87cefa, #d4a5a5); }
+        #scene7 .flower-petals { transform: scale(1.2); }
+        #scene8 { background: linear-gradient(to bottom, #ff69b4, #87ceeb); }
+        #scene9 { background: linear-gradient(to bottom, #ff69b4, #87ceeb); }
+        @media (max-width: 600px) {
+            .text { font-size: 1.5em; }
+            .continue-btn, .music-btn, .affirm-btn { font-size: 1em; padding: 8px 16px; }
+            .celestial, .cloud, .chicken, .busha-flower { transform: scale(0.8); }
+        }
+    </style>
+</head>
+<body>
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    <!-- Sahne 1: Giriş -->
+    <div class="scene" id="scene1">
+        <canvas id="canvas1"></canvas>
+        <div class="celestial sun"></div>
+        <div class="cloud" style="top: 15%; left: 20%;"></div>
+        <div class="cloud" style="top: 20%; left: 70%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Her şey çok güzeldi...</div>
+        <button class="music-btn">Müziği Aç</button>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 2: Çiçek Açıyor -->
+    <div class="scene" id="scene2">
+        <canvas id="canvas2"></canvas>
+        <div class="celestial sun"></div>
+        <div class="cloud" style="top: 15%; left: 20%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Senin için bir bahçe yaptım...</div>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 3: Özür Mesajı -->
+    <div class="scene" id="scene3">
+        <canvas id="canvas3"></canvas>
+        <div class="celestial sun"></div>
+        <div class="cloud" style="top: 15%; left: 20%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye sad"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text" id="words"></div>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 4: Sonbahar -->
+    <div class="scene" id="scene4">
+        <canvas id="canvas4"></canvas>
+        <div class="celestial moon"></div>
+        <div class="cloud dark" style="top: 15%; left: 20%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye sad"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Sen küstün...<br>Her şey solmaya başladı...</div>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 5: Fırtına -->
+    <div class="scene" id="scene5">
+        <canvas id="canvas5"></canvas>
+        <div class="celestial moon"></div>
+        <div class="cloud dark" style="top: 15%; left: 20%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye sad"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Fırtınanın ortasında kaldım...</div>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 6: Kış -->
+    <div class="scene" id="scene6">
+        <canvas id="canvas6"></canvas>
+        <div class="celestial moon"></div>
+        <div class="cloud dark" style="top: 15%; left: 20%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye sad"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Bensiz geçen her gün, soğuk bir kıştı.</div>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 7: Baharın Dönüşü -->
+    <div class="scene" id="scene7">
+        <canvas id="canvas7"></canvas>
+        <div class="celestial sun"></div>
+        <div class="cloud" style="top: 15%; left: 20%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Sadece bir özür değil...<br>...seninle yeniden başlamak istiyorum.</div>
+        <button class="continue-btn">Devam Et</button>
+    </div>
+    <!-- Sahne 8: Diz Çöken Tavuk -->
+    <div class="scene" id="scene8">
+        <canvas id="canvas8"></canvas>
+        <div class="celestial sun"></div>
+        <div class="cloud" style="top: 15%; left: 20%;"></div>
+        <div class="cloud" style="top: 20%; left: 70%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye sad"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Beni affeder misin, Büşra?</div>
+        <button class="affirm-btn">Evet, seni affediyorum</button>
+    </div>
+    <!-- Sahne 9: Sarılma ve Öpüşme -->
+    <div class="scene" id="scene9">
+        <canvas id="canvas9"></canvas>
+        <div class="celestial sun"></div>
+        <div class="cloud" style="top: 15%; left: 20%;"></div>
+        <div class="cloud" style="top: 20%; left: 70%;"></div>
+        <div class="chicken">
+            <div class="chicken-body">
+                <div class="chicken-head">
+                    <div class="chicken-eye"></div>
+                    <div class="chicken-beak"></div>
+                    <div class="tear"></div>
+                    <div class="heart"></div>
+                </div>
+                <div class="chicken-wing"></div>
+                <div class="chicken-wing right"></div>
+            </div>
+        </div>
+        <div class="busha-flower">
+            <div class="flower-stem"></div>
+            <div class="flower-petals"></div>
+            <div class="flower-center"></div>
+            <div class="flower-arm"></div>
+            <div class="flower-arm right"></div>
+        </div>
+        <div class="text">Seni Affettim! ❤️</div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script>
+        const scenes = document.querySelectorAll('.scene');
+        let currentScene = 0;
+        const music = document.getElementById('bg-music');
+        let musicStarted = false;
+
+        function playMusic() {
+            if (!musicStarted) {
+                music.play().catch(err => {
+                    console.log("Müzik çalma hatası:", err);
+                });
+                musicStarted = true;
+            }
+        }
+
+        function showScene(index) {
+            scenes.forEach((scene, i) => {
+                scene.classList.toggle('active', i === index);
+                const text = scene.querySelector('.text');
+                const btn = scene.querySelector('.continue-btn, .affirm-btn');
+                const musicBtn = scene.querySelector('.music-btn');
+                const celestial = scene.querySelector('.celestial');
+                const clouds = scene.querySelectorAll('.cloud');
+                const chicken = scene.querySelector('.chicken');
+                const flower = scene.querySelector('.busha-flower');
+                if (i === index) {
+                    gsap.to(text, { opacity: 1, duration: 2, delay: 1 });
+                    if (btn) gsap.to(btn, { opacity: 1, duration: 1, delay: 3 });
+                    if (musicBtn) gsap.to(musicBtn, { opacity: 1, duration: 1, delay: 3 });
+                    if (celestial) gsap.to(celestial, { y: 0, opacity: 1, duration: 2 });
+                    clouds.forEach((cloud, j) => {
+                        gsap.to(cloud, { x: j * 50, opacity: 1, duration: 2, delay: j * 0.5 });
+                    });
+                    if (chicken) {
+                        gsap.to(chicken, { opacity: 1, duration: 1 });
+                        if (index === 0) {
+                            gsap.to(chicken, { x: 0, duration: 2 });
+                            gsap.to(chicken.querySelector('.chicken-head'), { rotate: 10, duration: 1, yoyo: true, repeat: 1 });
+                        } else if (index === 1) {
+                            gsap.to(chicken, { y: -20, duration: 0.5, yoyo: true, repeat: 2 });
+                            gsap.to(chicken.querySelector('.heart'), { opacity: 1, scale: 1.2, duration: 0.5, yoyo: true, repeat: 1 });
+                        } else if (index === 2) {
+                            // Kelimelerle yaklaşma showNextWord'da
+                        } else if (index === 3) {
+                            gsap.to(chicken.querySelector('.chicken-head'), { y: 10, duration: 1 });
+                            gsap.to(chicken.querySelector('.tear'), { opacity: 1, y: 20, duration: 1, repeat: -1 });
+                        } else if (index === 4) {
+                            gsap.to(chicken, { x: 10, duration: 0.2, yoyo: true, repeat: 4 });
+                            gsap.to(chicken.querySelector('.tear'), { opacity: 1, y: 20, duration: 1, repeat: -1 });
+                            gsap.to(chicken.querySelector('.chicken-head'), { y: 10, duration: 1 });
+                        } else if (index === 5) {
+                            gsap.to(chicken, { y: 20, duration: 1 });
+                            gsap.to(chicken.querySelector('.tear'), { opacity: 1, y: 20, duration: 1, repeat: -1 });
+                            gsap.to(chicken.querySelector('.chicken-head'), { y: 10, duration: 1 });
+                        } else if (index === 6) {
+                            gsap.to(chicken, { y: -20, duration: 0.5, yoyo: true, repeat: 2 });
+                            gsap.to(chicken.querySelector('.heart'), { opacity: 1, scale: 1.2, duration: 0.5, yoyo: true, repeat: 1 });
+                        } else if (index === 7) {
+                            gsap.to(chicken, { y: 20, duration: 1 });
+                            gsap.to(chicken.querySelector('.chicken-body'), { y: 20, duration: 1 });
+                            gsap.to(chicken.querySelector('.chicken-wing'), { rotate: 90, x: -10, duration: 1 });
+                            gsap.to(chicken.querySelector('.chicken-wing.right'), { rotate: -90, x: 10, duration: 1 });
+                            gsap.to(chicken.querySelector('.heart'), { opacity: 1, scale: 1.2, duration: 0.5, yoyo: true, repeat: 1 });
+                            gsap.to(chicken.querySelector('.chicken-head'), { y: 10, duration: 1, delay: 1 });
+                            gsap.to(chicken.querySelector('.chicken-head'), { y: 0, rotate: 0, duration: 1, delay: 2 });
+                            gsap.to(chicken.querySelector('.chicken-wing'), { rotate: 45, x: -20, duration: 1, delay: 2 });
+                            gsap.to(chicken.querySelector('.chicken-wing.right'), { rotate: -45, x: 20, duration: 1, delay: 2 });
+                        } else if (index === 8) {
+                            gsap.to(chicken, { x: 100, duration: 1 });
+                            gsap.to(chicken, { y: -20, duration: 0.5, yoyo: true, repeat: -1 });
+                            gsap.to(chicken.querySelector('.chicken-wing'), { rotate: 45, x: -20, duration: 1 });
+                            gsap.to(chicken.querySelector('.chicken-wing.right'), { rotate: -45, x: 20, duration: 1 });
+                            gsap.to(chicken.querySelector('.heart'), { opacity: 1, scale: 1.5, duration: 1, repeat: 2 });
+                        }
+                    }
+                    if (flower) {
+                        gsap.to(flower, { opacity: 1, duration: 1 });
+                        if (index === 1) {
+                            gsap.to(flower.querySelector('.flower-stem'), { height: 100, duration: 2 });
+                            gsap.to(flower.querySelector('.flower-petals'), { scale: 1, duration: 2, delay: 1 });
+                        } else if (index === 8) {
+                            gsap.to(flower.querySelector('.busha-flower'), { x: -100, duration: 1 });
+                            gsap.to(flower.querySelectorAll('.flower-arm'), { opacity: 1, duration: 1 });
+                            gsap.to(flower.querySelector('.flower-arm'), { rotate: 45, x: -10, duration: 1 });
+                            gsap.to(flower.querySelector('.flower-arm.right'), { rotate: -45, x: 10, duration: 1 });
+                            gsap.to(flower.querySelector('.flower-petals'), { scale: 1.5, duration: 1 });
+                        }
+                    }
+                } else {
+                    gsap.to(text, { opacity: 0, duration: 0 });
+                    if (btn) gsap.to(btn, { opacity: 0, duration: 0 });
+                    if (musicBtn) gsap.to(musicBtn, { opacity: 0, duration: 0 });
+                    if (celestial) gsap.to(celestial, { y: 100, opacity: 0, duration: 0 });
+                    clouds.forEach(cloud => gsap.to(cloud, { opacity: 0, duration: 0 }));
+                    if (chicken) {
+                        gsap.to(chicken, { opacity: 0, duration: 0 });
+                        gsap.to(chicken.querySelector('.tear'), { opacity: 0, y: 0, duration: 0 });
+                        gsap.to(chicken.querySelector('.heart'), { opacity: 0, scale: 1, duration: 0 });
+                    }
+                    if (flower) {
+                        gsap.to(flower, { opacity: 0, duration: 0 });
+                        gsap.to(flower.querySelectorAll('.flower-arm'), { opacity: 0, duration: 0 });
+                    }
+                }
+            });
+        }
+
+        // Ortak Sınıflar
+        class Grass {
+            constructor(x, height, ctx, canvas) {
+                this.x = x;
+                this.height = height;
+                this.width = Math.random() * 4 + 2;
+                this.noiseOffset = Math.random() * 100;
+                this.color = `hsl(${Math.random() * 40 + 100}, 50%, 40%)`;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                const sway = Math.sin(Date.now() * 0.001 + this.noiseOffset) * 10 + Math.cos(Date.now() * 0.002 + this.noiseOffset) * 5;
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = currentScene === 5 ? '#b0c4de' : this.color;
+                this.ctx.lineWidth = this.width;
+                this.ctx.moveTo(this.x, this.canvas.height);
+                this.ctx.quadraticCurveTo(
+                    this.x + sway,
+                    this.canvas.height - this.height / 2,
+                    this.x + sway * 1.5,
+                    this.canvas.height - this.height
+                );
+                this.ctx.stroke();
+            }
+            update() {
+                this.draw();
+            }
+        }
+
+        class Flower {
+            constructor(x, ctx, canvas) {
+                this.x = x;
+                this.y = canvas.height;
+                this.stemHeight = 0;
+                this.maxStemHeight = Math.random() * 100 + 50;
+                this.size = 0;
+                this.maxSize = Math.random() * 20 + 10;
+                this.growthRate = Math.random() * 1 + 0.5;
+                this.color = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = '#2e8b57';
+                this.ctx.lineWidth = 3;
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.lineTo(this.x, this.y - this.stemHeight);
+                this.ctx.stroke();
+                if (this.size > 0) {
+                    this.ctx.fillStyle = this.color;
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (Math.PI / 4) * i;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(this.x + Math.cos(angle) * this.size, this.y - this.stemHeight + Math.sin(angle) * this.size, this.size / 2, this.size / 4, angle, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    this.ctx.beginPath();
+                    this.ctx.fillStyle = '#ffd700';
+                    this.ctx.arc(this.x, this.y - this.stemHeight, this.size / 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+            update() {
+                if (this.stemHeight < this.maxStemHeight) {
+                    this.stemHeight += this.growthRate;
+                } else if (this.size < this.maxSize) {
+                    this.size += this.growthRate * 0.5;
+                }
+                this.draw();
+            }
+        }
+
+        class Bird {
+            constructor(ctx, canvas) {
+                this.x = -50;
+                this.y = Math.random() * 100 + 50;
+                this.speed = Math.random() * 3 + 2;
+                this.angle = 0;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 2;
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.quadraticCurveTo(this.x + 10, this.y - 10, this.x + 20, this.y);
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.quadraticCurveTo(this.x + 10, this.y + 10, this.x + 20, this.y);
+                this.ctx.stroke();
+            }
+            update() {
+                this.x += this.speed;
+                this.y += Math.sin(this.angle) * 2;
+                this.angle += 0.05;
+                if (this.x > this.canvas.width + 50) this.x = -50;
+                this.draw();
+            }
+        }
+
+        class Ladybug {
+            constructor(ctx, canvas) {
+                this.x = -50;
+                this.y = canvas.height - 100;
+                this.speed = currentScene === 3 ? 4 : 2;
+                this.angle = 0;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.beginPath();
+                this.ctx.fillStyle = '#ff0000';
+                this.ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.fillStyle = '#000';
+                this.ctx.arc(this.x - 5, this.y - 5, 3, 0, Math.PI * 2);
+                this.ctx.arc(this.x + 5, this.y - 5, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            update() {
+                this.x += this.speed;
+                this.y += Math.sin(this.angle) * 2;
+                this.angle += 0.05;
+                if (this.x > this.canvas.width + 50) this.x = -50;
+                this.draw();
+            }
+        }
+
+        // Sahne 1: Giriş
+        const canvas1 = document.getElementById('canvas1');
+        const ctx1 = canvas1.getContext('2d');
+        canvas1.width = window.innerWidth;
+        canvas1.height = window.innerHeight;
+        const grasses1 = [];
+        const flowers1 = [];
+        const birds1 = [];
+        const ladybug1 = new Ladybug(ctx1, canvas1);
+        for (let i = 0; i < canvas1.width / 10; i++) {
+            grasses1.push(new Grass(i * 10, Math.random() * 80 + 40, ctx1, canvas1));
+        }
+        for (let i = 0; i < 5; i++) {
+            flowers1.push(new Flower(canvas1.width * (0.2 + i * 0.15), ctx1, canvas1));
+        }
+        for (let i = 0; i < 3; i++) {
+            birds1.push(new Bird(ctx1, canvas1));
+        }
+        function animateScene1() {
+            ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+            grasses1.forEach(grass => grass.update());
+            flowers1.forEach(flower => flower.update());
+            birds1.forEach(bird => bird.update());
+            ladybug1.update();
+            if (currentScene === 0) requestAnimationFrame(animateScene1);
+        }
+
+        // Sahne 2: Çiçek Açıyor
+        const canvas2 = document.getElementById('canvas2');
+        const ctx2 = canvas2.getContext('2d');
+        canvas2.width = window.innerWidth;
+        canvas2.height = window.innerHeight;
+        const grasses2 = [];
+        const flowers2 = [];
+        const birds2 = [];
+        const ladybug2 = new Ladybug(ctx2, canvas2);
+        for (let i = 0; i < canvas2.width / 10; i++) {
+            grasses2.push(new Grass(i * 10, Math.random() * 80 + 40, ctx2, canvas2));
+        }
+        for (let i = 0; i < 5; i++) {
+            flowers2.push(new Flower(canvas2.width * (0.2 + i * 0.15), ctx2, canvas2));
+        }
+        for (let i = 0; i < 3; i++) {
+            birds2.push(new Bird(ctx2, canvas2));
+        }
+        function animateScene2() {
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+            grasses2.forEach(grass => grass.update());
+            flowers2.forEach(flower => flower.update());
+            birds2.forEach(bird => bird.update());
+            ladybug2.update();
+            if (currentScene === 1) requestAnimationFrame(animateScene2);
+        }
+
+        // Sahne 3: Özür Mesajı
+        const canvas3 = document.getElementById('canvas3');
+        const ctx3 = canvas3.getContext('2d');
+        canvas3.width = window.innerWidth;
+        canvas3.height = window.innerHeight;
+        const grasses3 = [];
+        const flowers3 = [];
+        const birds3 = [];
+        const ladybug3 = new Ladybug(ctx3, canvas3);
+        for (let i = 0; i < canvas3.width / 10; i++) {
+            grasses3.push(new Grass(i * 10, Math.random() * 80 + 40, ctx3, canvas3));
+        }
+        for (let i = 0; i < 5; i++) {
+            flowers3.push(new Flower(canvas3.width * (0.2 + i * 0.15), ctx3, canvas3));
+        }
+        for (let i = 0; i < 3; i++) {
+            birds3.push(new Bird(ctx3, canvas3));
+        }
+        const words = ["Özür", "Dilerim", "Büşra...", "Kalbini kırmak istemedim.", "Sadece seni mutlu etmek istemiştim..."];
+        let wordIndex = 0;
+        function showNextWord() {
+            if (wordIndex < words.length) {
+                const wordDiv = document.createElement('span');
+                wordDiv.className = 'word';
+                wordDiv.textContent = words[wordIndex];
+                document.getElementById('words').appendChild(wordDiv);
+                gsap.to(wordDiv, { opacity: 1, y: 0, duration: 1 });
+                gsap.to(scenes[2].querySelector('.busha-flower .flower-petals'), { scale: 1.1, duration: 0.5, yoyo: true, repeat: 1 });
+                gsap.to(scenes[2].querySelector('.chicken'), { x: `+=${100 / words.length}`, duration: 1 });
+                gsap.to(scenes[2].querySelector('.chicken .heart'), { opacity: 1, scale: 1.2, duration: 0.5, yoyo: true, repeat: 1 });
+                wordIndex++;
+            }
+        }
+        function animateScene3() {
+            ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
+            grasses3.forEach(grass => grass.update());
+            flowers3.forEach(flower => flower.update());
+            birds3.forEach(bird => bird.update());
+            ladybug3.update();
+            if (currentScene === 2) requestAnimationFrame(animateScene3);
+        }
+
+        // Sahne 4: Sonbahar
+        const canvas4 = document.getElementById('canvas4');
+        const ctx4 = canvas4.getContext('2d');
+        canvas4.width = window.innerWidth;
+        canvas4.height = window.innerHeight;
+        const grasses4 = [];
+        const ladybug4 = new Ladybug(ctx4, canvas4);
+        for (let i = 0; i < canvas4.width / 10; i++) {
+            grasses4.push(new Grass(i * 10, Math.random() * 80 + 40, ctx4, canvas4));
+        }
+        class Leaf {
+            constructor(ctx, canvas) {
+                this.x = Math.random() * canvas.width;
+                this.y = -10;
+                this.size = Math.random() * 20 + 10;
+                this.speed = Math.random() * 3 + 1;
+                this.angle = Math.random() * Math.PI * 2;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.fillStyle = `hsl(${Math.random() * 30 + 10}, 70%, 50%)`;
+                this.ctx.beginPath();
+                this.ctx.ellipse(this.x, this.y, this.size, this.size / 2, this.angle, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.angle) * 2;
+                this.angle += 0.05;
+                if (this.y > this.canvas.height + 10) this.y = -10;
+                this.draw();
+            }
+        }
+        const leaves = [];
+        for (let i = 0; i < 20; i++) {
+            leaves.push(new Leaf(ctx4, canvas4));
+        }
+        function animateScene4() {
+            ctx4.clearRect(0, 0, canvas4.width, canvas4.height);
+            grasses4.forEach(grass => grass.update());
+            ladybug4.update();
+            leaves.forEach(leaf => leaf.update());
+            if (currentScene === 3) requestAnimationFrame(animateScene4);
+        }
+
+        // Sahne 5: Fırtına
+        const canvas5 = document.getElementById('canvas5');
+        const ctx5 = canvas5.getContext('2d');
+        canvas5.width = window.innerWidth;
+        canvas5.height = window.innerHeight;
+        const grasses5 = [];
+        for (let i = 0; i < canvas5.width / 10; i++) {
+            grasses5.push(new Grass(i * 10, Math.random() * 80 + 40, ctx5, canvas5));
+        }
+        class Rain {
+            constructor(ctx, canvas) {
+                this.x = Math.random() * canvas.width;
+                this.y = -10;
+                this.length = Math.random() * 20 + 10;
+                this.speed = Math.random() * 10 + 5;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.strokeStyle = '#87ceeb';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.lineTo(this.x, this.y + this.length);
+                this.ctx.stroke();
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > this.canvas.height) this.y = -10;
+                this.draw();
+            }
+        }
+        const rains = [];
+        for (let i = 0; i < 50; i++) {
+            rains.push(new Rain(ctx5, canvas5));
+        }
+        function animateScene5() {
+            ctx5.clearRect(0, 0, canvas5.width, canvas5.height);
+            ctx5.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx5.fillRect(0, 0, canvas5.width, canvas5.height);
+            grasses5.forEach(grass => grass.update());
+            rains.forEach(rain => rain.update());
+            if (currentScene === 4) requestAnimationFrame(animateScene5);
+        }
+
+        // Sahne 6: Kış
+        const canvas6 = document.getElementById('canvas6');
+        const ctx6 = canvas6.getContext('2d');
+        canvas6.width = window.innerWidth;
+        canvas6.height = window.innerHeight;
+        const grasses6 = [];
+        for (let i = 0; i < canvas6.width / 10; i++) {
+            grasses6.push(new Grass(i * 10, Math.random() * 80 + 40, ctx6, canvas6));
+        }
+        class Snowflake {
+            constructor(ctx, canvas) {
+                this.x = Math.random() * canvas.width;
+                this.y = -10;
+                this.size = Math.random() * 5 + 2;
+                this.speed = Math.random() * 3 + 1;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.fillStyle = '#fff';
+                this.ctx.beginPath();
+                this.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.y * 0.01);
+                if (this.y > this.canvas.height) this.y = -10;
+                this.draw();
+            }
+        }
+        const snowflakes = [];
+        for (let i = 0; i < 50; i++) {
+            snowflakes.push(new Snowflake(ctx6, canvas6));
+        }
+        function animateScene6() {
+            ctx6.clearRect(0, 0, canvas6.width, canvas6.height);
+            grasses6.forEach(grass => grass.update());
+            snowflakes.forEach(snow => snow.update());
+            if (currentScene === 5) requestAnimationFrame(animateScene6);
+        }
+
+        // Sahne 7: Baharın Dönüşü
+        const canvas7 = document.getElementById('canvas7');
+        const ctx7 = canvas7.getContext('2d');
+        canvas7.width = window.innerWidth;
+        canvas7.height = window.innerHeight;
+        const grasses7 = [];
+        const flowers7 = [];
+        const birds7 = [];
+        const ladybug7 = new Ladybug(ctx7, canvas7);
+        for (let i = 0; i < canvas7.width / 10; i++) {
+            grasses7.push(new Grass(i * 10, Math.random() * 80 + 40, ctx7, canvas7));
+        }
+        for (let i = 0; i < 5; i++) {
+            flowers7.push(new Flower(canvas7.width * (0.2 + i * 0.15), ctx7, canvas7));
+        }
+        for (let i = 0; i < 3; i++) {
+            birds7.push(new Bird(ctx7, canvas7));
+        }
+        function animateScene7() {
+            ctx7.clearRect(0, 0, canvas7.width, canvas7.height);
+            grasses7.forEach(grass => grass.update());
+            flowers7.forEach(flower => flower.update());
+            birds7.forEach(bird => bird.update());
+            ladybug7.update();
+            if (currentScene === 6) requestAnimationFrame(animateScene7);
+        }
+
+        // Sahne 8: Diz Çöken Tavuk
+        const canvas8 = document.getElementById('canvas8');
+        const ctx8 = canvas8.getContext('2d');
+        canvas8.width = window.innerWidth;
+        canvas8.height = window.innerHeight;
+        const grasses8 = [];
+        const flowers8 = [];
+        const birds8 = [];
+        const ladybug8 = new Ladybug(ctx8, canvas8);
+        for (let i = 0; i < canvas8.width / 10; i++) {
+            grasses8.push(new Grass(i * 10, Math.random() * 80 + 40, ctx8, canvas8));
+        }
+        function animateScene8() {
+            ctx8.clearRect(0, 0, canvas8.width, canvas8.height);
+            grasses8.forEach(grass => grass.update());
+            flowers8.forEach(flower => flower.update());
+            birds8.forEach(bird => bird.update());
+            ladybug8.update();
+            if (currentScene === 7) requestAnimationFrame(animateScene8);
+        }
+
+        // Sahne 9: Sarılma ve Öpüşme
+        const canvas9 = document.getElementById('canvas9');
+        const ctx9 = canvas9.getContext('2d');
+        canvas9.width = window.innerWidth;
+        canvas9.height = window.innerHeight;
+        const grasses9 = [];
+        const flowers9 = [];
+        const birds9 = [];
+        const ladybug9 = new Ladybug(ctx9, canvas9);
+        for (let i = 0; i < canvas9.width / 10; i++) {
+            grasses9.push(new Grass(i * 10, Math.random() * 80 + 40, ctx9, canvas9));
+        }
+        function animateScene9() {
+            ctx9.clearRect(0, 0, canvas9.width, canvas9.height);
+            grasses9.forEach(grass => grass.update());
+            flowers9.forEach(flower => flower.update());
+            birds9.forEach(bird => bird.update());
+            ladybug9.update();
+            hearts.forEach(heart => heart.update());
+            if (currentScene === 8) requestAnimationFrame(animateScene9);
+        }
+
+        // Kalp Animasyonu
+        class Heart {
+            constructor(ctx, canvas) {
+                this.x = canvas.width / 2;
+                this.y = canvas.height;
+                this.size = Math.random() * 20 + 10;
+                this.speed = Math.random() * 5 + 2;
+                this.angle = Math.random() * Math.PI * 2;
+                this.ctx = ctx;
+                this.canvas = canvas;
+            }
+            draw() {
+                this.ctx.fillStyle = '#ff69b4';
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.x, this.y);
+                this.ctx.quadraticCurveTo(this.x - this.size, this.y - this.size, this.x, this.y - this.size * 2);
+                this.ctx.quadraticCurveTo(this.x + this.size, this.y - this.size, this.x, this.y);
+                this.ctx.fill();
+            }
+            update() {
+                this.y -= this.speed;
+                this.x += Math.sin(this.angle) * 2;
+                this.angle += 0.05;
+                if (this.y < -50) this.y = this.canvas.height;
+                this.draw();
+            }
+        }
+        const hearts = [];
+
+        // Sahne Geçişleri
+        document.querySelectorAll('.continue-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentScene === 2) {
+                    showNextWord();
+                    if (wordIndex >= words.length) {
+                        currentScene++;
+                        wordIndex = 0;
+                        document.getElementById('words').innerHTML = '';
+                        showScene(currentScene);
+                        if (currentScene === 3) animateScene4();
+                        else if (currentScene === 4) animateScene5();
+                        else if (currentScene === 5) animateScene6();
+                        else if (currentScene === 6) animateScene7();
+                        else if (currentScene === 7) animateScene8();
+                    }
+                } else {
+                    currentScene++;
+                    showScene(currentScene);
+                    if (currentScene === 1) animateScene2();
+                    else if (currentScene === 2) animateScene3();
+                    else if (currentScene === 3) animateScene4();
+                    else if (currentScene === 4) animateScene5();
+                    else if (currentScene === 5) animateScene6();
+                    else if (currentScene === 6) animateScene7();
+                    else if (currentScene === 7) animateScene8();
+                }
+            });
+        });
+
+        document.querySelector('.music-btn').addEventListener('click', () => {
+            playMusic();
+        });
+
+        document.querySelector('.affirm-btn').addEventListener('click', () => {
+            currentScene++;
+            showScene(currentScene);
+            if (currentScene === 8) animateScene9();
+            for (let i = 0; i < 20; i++) {
+                hearts.push(new Heart(ctx9, canvas9));
+            }
+            for (let i = 0; i < 5; i++) {
+                flowers9.push(new Flower(canvas9.width * (0.2 + i * 0.15), ctx9, canvas9));
+            }
+            for (let i = 0; i < 3; i++) {
+                birds9.push(new Bird(ctx9, canvas9));
+            }
+            gsap.to(scenes[8].querySelectorAll('.cloud'), { opacity: 0, duration: 1 });
+            gsap.to(scenes[8].querySelector('.celestial'), { opacity: 1, duration: 1 });
+        });
+
+        // Başlangıç
+        showScene(0);
+        animateScene1();
+    </script>
+</body>
+</html>
